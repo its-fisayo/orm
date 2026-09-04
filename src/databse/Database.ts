@@ -21,12 +21,15 @@ export class Database {
     });
 
     console.log("Connected to SQL Server");
+  }
+  
+   async query<T = any>(query: string): Promise<T[]> {
+    if (!this.pool) {
+      throw new Error("Database is not connected");
+    }
 
-    const result = await this.pool.request().query(`
-  SELECT TOP 10 *
-  FROM Users
-`);
+    const result = await this.pool.request().query(query);
 
-    console.log(result.recordset);
+    return result.recordset;
   }
 }
