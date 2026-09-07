@@ -1,5 +1,7 @@
 import sql from "mssql";
 import type { ConnectionConfig } from "./ConnectionConfig.js";
+import { QueryBuilder } from "./QueryBuilder.js";
+import { SchemaBuilder } from "./SchemaBuilder.js";
 
 export class Database {
   private pool: sql.ConnectionPool | null = null;
@@ -22,14 +24,32 @@ export class Database {
 
     console.log("Connected to SQL Server");
   }
-  
-   async query<T = any>(query: string): Promise<T[]> {
+
+  async query<T = any>(
+    query: string,
+    params?: Record<string, unknown>,
+  ): Promise<T[]> {
     if (!this.pool) {
       throw new Error("Database is not connected");
     }
 
-    const result = await this.pool.request().query(query);
+    const request = this.pool.request();
+    if(params) {
+      for (const [key, value] of Object.entries(params)) {
+        request.input(key, value);
+      }
+    }
+
+    const result = await request.query(query);
 
     return result.recordset;
+  }
+
+  table(tableName: string): QueryBuilder {
+    return new QueryBuilder(this, tableName);
+  }
+
+  schema(): SchemaBuilder {
+    return new SchemaBuilder(this);
   }
 }
