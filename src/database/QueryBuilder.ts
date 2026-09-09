@@ -1,4 +1,3 @@
-import { dir } from "node:console";
 import { Database } from "./Database.js";
 
 export class QueryBuilder {
@@ -6,7 +5,7 @@ export class QueryBuilder {
   private parameters: Record<string, unknown> = {};
   private orderByClause: string | null = null;
   private limitValue: number | null = null;
-  private selectedColumns: string[] = ["*"];
+  private selectedColumns: string[] = [];
 
   private addParameter(value: unknown): string {
     const parameterName = `param${Object.keys(this.parameters).length}`;
@@ -82,12 +81,19 @@ export class QueryBuilder {
   }
   async get<T = any>(): Promise<T[]> {
     let query = `SELECT`;
+    let columns: string[];
+
+    if(this.selectedColumns.length > 0) {
+      columns = this.selectedColumns
+    } else {
+      columns = await this.db.getTableName(this.tableName);
+    }
 
     if (this.limitValue !== null) {
       query += ` TOP ${this.limitValue}`;
     }
 
-    query += ` ${this.selectedColumns.join(", ")} FROM ${this.tableName}`;
+    query += ` ${columns.join(", ")} FROM ${this.tableName}`;
 
     if (this.conditions.length > 0) {
       query += ` WHERE ${this.conditions.join(" AND ")}`;
@@ -96,7 +102,8 @@ export class QueryBuilder {
     if (this.orderByClause) {
       query += ` ORDER BY ${this.orderByClause}`;
     }
-
+console.log("Generated SQL:", query);
+console.log("Parameters:", this.parameters);
     return this.db.query<T>(query, this.parameters);
   }
 

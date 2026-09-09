@@ -12,7 +12,7 @@ const config: ConnectionConfig = {
 const db = new Database(config);
 await db.connect();
 
-// const users = await db.table("Users").orderBy("id", "DESC").limit(10).get();
+const users = await db.table("Users").select("id").get();
 // const orders = await db.table("Orders").where("total", ">", 15).where("userid", "=", 1).get();
 // const orders = await db
 //   .table("Orders")
@@ -32,7 +32,7 @@ await db.connect();
 
 // console.log("Total orders:", count);
 
-// console.log(users);
+console.log(users);
 // console.log(orders);
 // console.log(user);
 // console.log(updateOrders);
@@ -44,9 +44,9 @@ await db.connect();
 //     Name NVARCHAR(100) NOT NULL,
 //     Email NVARCHAR(255) NOT NULL`
 // );
-await db.schema().dropTable("Workers");
+// await db.schema().dropTable("Workers");
 
-console.log("Workers table dropped");
+// console.log("Workers table dropped");
 // console.log("Workers table created");
 
 // const workers = await db.table("Workers").get();
